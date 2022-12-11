@@ -55,6 +55,10 @@ fn main() {
             };
 
             let average_peak = total / update_count;
+            if update_count == 100.0 {
+                update_count = 0.0;
+                total = 0.0;
+            }
 
             gamesense
                 .send_event("SYNC", GameData {
@@ -66,7 +70,7 @@ fn main() {
 
             update_count += 1.0;
             total += peak_value;
-            std::thread::sleep(Duration::from_millis(10));
+            std::thread::sleep(Duration::from_millis(20));
         }
     }
 }
