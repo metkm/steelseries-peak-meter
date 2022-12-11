@@ -7,6 +7,7 @@ use models::GameData;
 use mouse::get_props;
 
 use std::time::Duration;
+use std::io::Write;
 
 use windows::core::GUID;
 use windows::Win32::Media::Audio::{
@@ -45,18 +46,27 @@ fn main() {
             .Activate::<IAudioMeterInformation>(CLSCTX_ALL, None)
             .expect("error getting information");
 
+        let mut update_count = 0.0;
+        let mut total = 0.0;
+        let mut lock = std::io::stdout().lock();
         loop {
             let Ok(peak_value) = meter_information.GetPeakValue() else {
                 continue;
             };
 
+            let average_peak = total / update_count;
+
             gamesense
                 .send_event("SYNC", GameData {
-                    value: peak_value * 200.0
+                    value: if peak_value > average_peak { 1 } else { 0 }
                 })
                 .ok();
 
-            std::thread::sleep(Duration::from_millis(50));
+            writeln!(lock, "Average {:.5} - Peak {:.5} - Update {}", average_peak, peak_value, update_count).ok();
+
+            update_count += 1.0;
+            total += peak_value;
+            std::thread::sleep(Duration::from_millis(10));
         }
     }
 }

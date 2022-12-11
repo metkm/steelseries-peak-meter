@@ -18,7 +18,7 @@ pub struct GameEvent<'a> {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GameData {
-    pub value: f32
+    pub value: u32
 }
 
 #[derive(Debug, Serialize, Deserialize)]
